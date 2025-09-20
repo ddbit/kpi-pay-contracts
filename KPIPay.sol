@@ -40,16 +40,15 @@ contract KPIPay {
     }
 
     function pay() external {
-        require(performance.Indicator(key) >= benchmark, "benchmark not met");
+        uint256 indicator = performance.Indicator(key);
         uint256 bal = IERC20(tokenContract).balanceOf(address(this));
         require(bal > 0, "zero balance");
-        require(IERC20(tokenContract).transfer(receiver, bal), "transfer failed");
-    }
-
-    function reimburse() external {
-        require(block.timestamp > time0 + timeout, "timeout not reached");
-        uint256 bal = IERC20(tokenContract).balanceOf(address(this));
-        require(bal > 0, "zero balance");
-        require(IERC20(tokenContract).transfer(sender, bal), "transfer failed");
+        
+        if (indicator >= benchmark) {
+            require(IERC20(tokenContract).transfer(receiver, bal), "transfer failed");
+        } else {
+            require(block.timestamp > time0 + timeout, "timeout not reached");
+            require(IERC20(tokenContract).transfer(sender, bal), "transfer failed");
+        }
     }
 }
